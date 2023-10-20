@@ -44,8 +44,6 @@ RCB         : '}'       ;
 /* ignore all white space characters */
 WS  :   (' ' | '\t' | '\r'| '\n' | '\u000C' ) -> skip ;
 
-// todo : Add comments to hiddent channel
-
 /* Reserved Keywords */
 IMPORT      : 'import'   ;
 FUNCTION    : 'function' ;
@@ -67,10 +65,8 @@ CREATE      : 'create'   ;
 EDIT        : 'edit'     ;
 DELETE      : 'delete'   ;
 VIEW        : 'view'     ;
-VALUES      : 'values'   ;
-DATA        : 'data'     ;
-METADATA    : 'metadata' ;
 
+ASSIGN      : '='       ;
 APPEND      : '+='       ;
 COMMA       : ','        ;
 COLON       : ':'        ;

@@ -7,40 +7,23 @@ options {
 }
 
 script
-    : (comments|function)* EOF
-    ;
-
-// Line Comments
-/* Block Comments */
-comments
-    : SingleLineComment                 #singleLineComment
-    | MultiLineComment                  #multiLineComment
-    ;
-
-function
-    : functionBlock
-    | importedFunction
+    : (comment|imports|function)* EOF
     ;
 
 /*
 import "path to .xpr file"
 */
-importedFunction
+imports
     : IMPORT path=TEXT
     ;
 
 /*
-function (p1, p2, ...) {
+function foo(p1, p2, ...) {
     // actions
 }
 */
-functionBlock
-    : FUNCTION name=IDENTIFIER parameters? actionBlock
-    ;
-
-// (p1, p2, ...)
-parameters
-    : (LRB variable ( COMMA variable )* RRB)
+function
+    : FUNCTION name=IDENTIFIER (LRB arguments RRB)? functionBody
     ;
 
 /*
@@ -50,42 +33,37 @@ parameters
     ...
 }
 */
-actionBlock
-    : LCB actions? RCB
-    ;
-/*
-    action1
-    action2
-    ...
-*/
-actions
-    : action+
+functionBody
+    : LCB (action+)? RCB
     ;
 
 action
     : assignment
+    | comment
     | conditional
-    | iterate
-    | return
+    | iterable
     | actionable
+    | object
+    | return
     ;
 
 assignment
     // def X = [42]
-    : DEF variable EQ expression            #setVariableWithExpression
+    : DEF variable ASSIGN LSB expression RSB    #variableWithExpression
     // def apple = create(data=.., metadata=..)
-    | DEF variable EQ object                #setVariableWithObject
+    | DEF variable ASSIGN object                #variableWithObject
     // def foo = bar(p1=[exp1], p2=[exp2], ..)
-    | DEF variable EQ actionable            #setVariableWithAction
+    | DEF variable ASSIGN actionable            #variableWithAction
     ;
 
-//<-- object
+// object -->
 
 object
     : createObject
     | editObject
     | deleteObject
     | viewObject
+    | viewData
     ;
 
 createObject
@@ -93,49 +71,58 @@ createObject
     ;
 
 editObject
-    : EDIT expression objectData
+    : EDIT LSB expression RSB objectData?
     ;
 
 deleteObject
-    : DELETE expression objectData
+    : DELETE LSB expression RSB objectData?
     ;
 
 viewObject
-    : VIEW expression objectData
+    : VIEW LSB expression RSB objectData?
+    ;
+
+viewData
+    : VIEW objectData
     ;
 
 objectData
-    : LRB (DATA EQ valuesBlock)? COMMA (METADATA EQ TEXT)? RRB
+    : LRB objectProperty (COMMA objectProperty)* RRB
+    ;
+
+objectProperty
+    : name=IDENTIFIER ASSIGN (valuesBlock|TEXT)
     ;
 
 valuesBlock
-    : LCB (IDENTIFIER EQ expression ( COMMA ( IDENTIFIER EQ expression ) )* )? RCB
+    : LCB (IDENTIFIER ASSIGN LSB expression RSB ( COMMA ( IDENTIFIER ASSIGN LSB expression RSB ) )* )? RCB
     ;
 
-variable
-	: name=IDENTIFIER (COLON dataType=IDENTIFIER)?
-	;
+// <-- object
 
-// object -->
+// actionable -->
 
 actionable
     // action "action.json"
-    : ACTION actionPath=TEXT                #callFileAction
+    : ACTION actionPath=TEXT                #externalAction
     // foobar(p1=[exp1], p2=[exp2], ..)
     | name=IDENTIFIER parameters            #callFunction
     // function add(p1=[exp1], p2=[exp2], ..) { actions }
-    | FUNCTION name=IDENTIFIER parameters actionBlock
-                                            #callInlineFunction
+    | name=IDENTIFIER parameters functionBody
+                                            #inlineFunction
     ;
 
-arguments
-    : LRB ( argument ( COMMA argument )* ) RRB
+parameters
+    : LRB parameter ( COMMA parameter )* RRB
     ;
 
-argument
+parameter
     : IDENTIFIER COLON IDENTIFIER       #literalParameter
-    | IDENTIFIER COLON                  #formulaParameter
+    | IDENTIFIER COLON expression       #formulaParameter
     ;
+
+// actionable -->
+
 // <-- conditional
 
 conditional
@@ -145,34 +132,50 @@ conditional
 
 switch
     : SWITCH LCB
-        ( CASE expression caseBlock=actionBlock )*
-        ( ELSE defaultBlock=actionBlock )?
+        ( CASE expression caseBlock=functionBody )*
+        ( ELSE defaultBlock=functionBody )?
       RCB
     ;
 
 ifElse
-    : IF ifCondition=expression ifBloack=actionBlock
-      ( ELSE IF elseIfCondition=expression elseIfBloack=actionBlock )*
-      ( ELSE elseBlock=actionBlock )?
+    : IF ifCondition=expression ifBloack=functionBody
+    ( ELSE IF elseIfCondition=expression elseIfBloack=functionBody )*
+    ( ELSE elseBlock=functionBody )?
     ;
 
 // conditional -->
 
-iterate
+iterable
     /*
     items(key:k, value:v in [$object] with "regEx") { actions }
     */
-    : ITEMS ( argument ( COMMA argument )* )? IN objectName=IDENTIFIER (WITH regex=TEXT)? actionBlock
-                                        #iterateFields
+    : ITEMS LRB parameter ( COMMA parameter )*
+                IN var=expression (WITH regex=TEXT)?
+            RRB functionBody            #iterateFields
     /*
     items(item:it, index:i in [$array]) { actions }
     */
-    | ITEMS ( argument ( COMMA argument )* )? IN arrayName=IDENTIFIER actionBlock
-                                        #iterateArray
+    | ITEMS LRB parameter ( COMMA parameter )*
+                IN var=expression
+            RRB functionBody            #iterateArray
     ;
 
-
-
 return
-    : RETURN ( expression )?
+    : RETURN (LSB expression RSB)?
+    ;
+
+// (p1, p2:Int, ...)
+arguments
+    : (variable ( COMMA variable )*)?
+    ;
+
+variable
+	: name=IDENTIFIER (COLON dataType=IDENTIFIER)?
+	;
+
+// Line Comments
+/* Block Comments */
+comment
+    : SingleLineComment                 #singleLineComment
+    | MultiLineComment                  #multiLineComment
     ;
