@@ -73,6 +73,16 @@
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/xpressor/src/antlr/Xpress.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="$PROJECT_DIR$/xpressor/build/generated" />
+          <option name="libDir" value="$PROJECT_DIR$/xpressor/src/antlr" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="com.xpress.xpressor.internal" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
       </list>
     </option>
   </component>

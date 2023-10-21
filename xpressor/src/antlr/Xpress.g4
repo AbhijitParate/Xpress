@@ -6,15 +6,21 @@ options {
     tokenVocab=XpressionLexer;
 }
 
-script
-    : (comment|imports|function)* EOF
+configRoot
+    : config* EOF
+    ;
+
+config
+    :   comment         #commentConfig
+    |   imports         #importConfig
+    |   function        #functionConfig
     ;
 
 /*
 import "path to .xpr file"
 */
 imports
-    : IMPORT path=TEXT
+    : IMPORT (MUL|IDENTIFIER) FROM path=TEXT
     ;
 
 /*
@@ -23,7 +29,7 @@ function foo(p1, p2, ...) {
 }
 */
 function
-    : FUNCTION name=IDENTIFIER (LRB arguments RRB)? functionBody
+    : FUNCTION name=IDENTIFIER (LRB (variable ( COMMA variable )*)? RRB)? body=statementBlack
     ;
 
 /*
@@ -33,69 +39,71 @@ function
     ...
 }
 */
-functionBody
-    : LCB (action+)? RCB
+statementBlack
+    : LCB (statement+)? RCB
     ;
 
-action
-    : assignment
-    | comment
-    | conditional
-    | iterable
-    | actionable
-    | object
-    | return
+statement
+    : comment               #commentStatemtent
+    | assignable            #assignmentStatemtent
+    | conditional           #conditionalStatemtent
+    | iterable              #iterableStatemtent
+    | crudable              #crudableStatement
+    | actionable            #actionableStatement
+    | return                #returnStatement
     ;
 
-assignment
+assignable
     // def X = [42]
-    : DEF variable ASSIGN LSB expression RSB    #variableWithExpression
+    : DEF variable ASSIGN LSB xpression RSB    #variableWithXpression
     // def apple = create(data=.., metadata=..)
-    | DEF variable ASSIGN object                #variableWithObject
+    | DEF variable ASSIGN crudable              #variableWithObject
     // def foo = bar(p1=[exp1], p2=[exp2], ..)
     | DEF variable ASSIGN actionable            #variableWithAction
     ;
 
 // object -->
 
-object
-    : createObject
-    | editObject
-    | deleteObject
-    | viewObject
+crudable
+    : createEntity
+    | editEntity
+    | deleteEntity
+    | viewEntity
     | viewData
     ;
 
-createObject
-    : CREATE objectData
+createEntity
+    : CREATE metadata
     ;
 
-editObject
-    : EDIT LSB expression RSB objectData?
+editEntity
+    : EDIT LSB xpression RSB metadata?
     ;
 
-deleteObject
-    : DELETE LSB expression RSB objectData?
+deleteEntity
+    : DELETE LSB xpression RSB metadata?
     ;
 
-viewObject
-    : VIEW LSB expression RSB objectData?
+viewEntity
+    : VIEW LSB xpression RSB metadata?
     ;
 
 viewData
-    : VIEW objectData
+    : VIEW metadata
     ;
 
-objectData
-    : LRB objectProperty (COMMA objectProperty)* RRB
+metadata
+    : LRB metadataElement (COMMA metadataElement)* RRB
     ;
 
-objectProperty
-    : name=IDENTIFIER ASSIGN (valuesBlock|TEXT)
+metadataElement
+    : name=IDENTIFIER ASSIGN TEXT           #textElement
+    | name=IDENTIFIER ASSIGN IDENTIFIER     #nameElement
+    | name=IDENTIFIER ASSIGN metadataBlock  #blockElement
     ;
 
-valuesBlock
-    : LCB (IDENTIFIER ASSIGN LSB expression RSB ( COMMA ( IDENTIFIER ASSIGN LSB expression RSB ) )* )? RCB
+metadataBlock
+    : LCB (IDENTIFIER ASSIGN LSB xpression RSB ( COMMA ( IDENTIFIER ASSIGN LSB xpression RSB ) )* )? RCB
     ;
 
 // <-- object
@@ -106,10 +114,10 @@ actionable
     // action "action.json"
     : ACTION actionPath=TEXT                #externalAction
     // foobar(p1=[exp1], p2=[exp2], ..)
-    | name=IDENTIFIER parameters            #callFunction
+    | name=IDENTIFIER parameters            #functionCall
     // function add(p1=[exp1], p2=[exp2], ..) { actions }
-    | name=IDENTIFIER parameters functionBody
-                                            #inlineFunction
+    | name=IDENTIFIER parameters statementBlack
+                                            #inlineFunctionCall
     ;
 
 parameters
@@ -117,8 +125,8 @@ parameters
     ;
 
 parameter
-    : IDENTIFIER COLON IDENTIFIER       #literalParameter
-    | IDENTIFIER COLON expression       #formulaParameter
+    : name=IDENTIFIER COLON value=IDENTIFIER       #valueParameter
+    | name=IDENTIFIER COLON value=xpression        #xpressionParameter
     ;
 
 // actionable -->
@@ -130,17 +138,17 @@ conditional
     | switch
     ;
 
-switch
-    : SWITCH LCB
-        ( CASE expression caseBlock=functionBody )*
-        ( ELSE defaultBlock=functionBody )?
-      RCB
+ifElse
+    : IF ifCondition=xpression ifBloack=statementBlack
+    ( ELSE IF elseIfCondition=xpression elseIfBloack=statementBlack )*
+    ( ELSE elseBlock=statementBlack )?
     ;
 
-ifElse
-    : IF ifCondition=expression ifBloack=functionBody
-    ( ELSE IF elseIfCondition=expression elseIfBloack=functionBody )*
-    ( ELSE elseBlock=functionBody )?
+switch
+    : SWITCH LCB
+        ( CASE xpression caseBlock=statementBlack )*
+        ( ELSE defaultBlock=statementBlack )?
+      RCB
     ;
 
 // conditional -->
@@ -150,27 +158,26 @@ iterable
     items(key:k, value:v in [$object] with "regEx") { actions }
     */
     : ITEMS LRB parameter ( COMMA parameter )*
-                IN var=expression (WITH regex=TEXT)?
-            RRB functionBody            #iterateFields
+                IN var=xpression (WITH regex=TEXT)?
+            RRB statementBlack            #iterateFields
     /*
     items(item:it, index:i in [$array]) { actions }
     */
     | ITEMS LRB parameter ( COMMA parameter )*
-                IN var=expression
-            RRB functionBody            #iterateArray
+                IN var=xpression
+            RRB statementBlack            #iterateArray
     ;
 
 return
-    : RETURN (LSB expression RSB)?
+    : RETURN (LSB xpression RSB)?
     ;
 
-// (p1, p2:Int, ...)
-arguments
-    : (variable ( COMMA variable )*)?
+xpression
+    : expression
     ;
 
 variable
-	: name=IDENTIFIER (COLON dataType=IDENTIFIER)?
+	: name=IDENTIFIER (COLON type=IDENTIFIER)?
 	;
 
 // Line Comments

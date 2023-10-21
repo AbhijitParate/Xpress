@@ -46,6 +46,7 @@ WS  :   (' ' | '\t' | '\r'| '\n' | '\u000C' ) -> skip ;
 
 /* Reserved Keywords */
 IMPORT      : 'import'   ;
+FROM        : 'from'     ;
 FUNCTION    : 'function' ;
 DEF         : 'def'      ;
 ACTION      : 'action'   ;
