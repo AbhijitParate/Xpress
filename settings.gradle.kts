@@ -16,5 +16,5 @@ dependencyResolutionManagement {
 rootProject.name = "Xpress"
 include(":app")
 include(":xpress")
-include(":xpresso")
-include(":xpressor")
+include(":xpress-config")
+include(":xpress-interface")

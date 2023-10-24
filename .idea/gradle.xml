@@ -12,8 +12,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/xpress" />
-            <option value="$PROJECT_DIR$/xpresso" />
-            <option value="$PROJECT_DIR$/xpressor" />
+            <option value="$PROJECT_DIR$/xpress-config" />
+            <option value="$PROJECT_DIR$/xpress-interface" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

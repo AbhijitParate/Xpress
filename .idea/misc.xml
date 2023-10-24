@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ANTLRGenerationPreferences">
     <option name="perGrammarGenerationSettings">
@@ -83,11 +82,41 @@
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/xpress-config/src/antlr/XpressionLexer.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="$PROJECT_DIR$/xpress-config/build/generated" />
+          <option name="libDir" value="$PROJECT_DIR$/xpress-config/src/antlr" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="com.xpress.config.internal" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/xpress-config/src/antlr/Xpression.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="$PROJECT_DIR$/xpress-config/build/generated" />
+          <option name="libDir" value="$PROJECT_DIR$/xpress-config/src/antlr" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="com.xpress.config.internal" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/xpress-config/src/antlr/Xpress.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="$PROJECT_DIR$/xpress-config/build/generated" />
+          <option name="libDir" value="$PROJECT_DIR$/xpress-config/src/antlr" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="com.xpress.config.internal" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
       </list>
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
