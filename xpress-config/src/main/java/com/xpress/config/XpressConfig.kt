@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.DefaultErrorStrategy
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Token
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
@@ -59,17 +60,14 @@ class XpressConfig internal constructor(val configs: List<Config>) : Config() {
         private val ErrorHandler by lazy {
             object : DefaultErrorStrategy() {
                 override fun recover(recognizer: Parser, e: RecognitionException) = throw e
-                override fun recoverInline(recognizer: Parser) = throw RuntimeException(
-                    "Error: Invalid character '${recognizer.currentToken.text}'" +
-                            " at [${recognizer.currentToken.line}:${recognizer.currentToken.charPositionInLine}]"
-                )
+                override fun recoverInline(recognizer: Parser): Token? = null
             }
         }
 
         fun from(file: File): XpressConfig {
             val parser = file.toXpressConfigParser().apply {
                 removeErrorListeners()
-                errorHandler = ErrorHandler
+//                errorHandler = ErrorHandler
             }
             val root = parser.configRoot()
             return Visitor().visit(root) as XpressConfig
@@ -78,7 +76,7 @@ class XpressConfig internal constructor(val configs: List<Config>) : Config() {
         fun from(file: InputStream): XpressConfig {
             val parser = file.toXpressConfigParser().apply {
                 removeErrorListeners()
-                errorHandler = ErrorHandler
+//                errorHandler = ErrorHandler
             }
             val root = parser.configRoot()
             return Visitor().visit(root) as XpressConfig

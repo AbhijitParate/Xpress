@@ -2,8 +2,7 @@ package com.xpress.config
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
-import com.xpress.config.Component.Argument
-import com.xpress.config.Component.Xpression
+import com.xpress.config.Component.*
 
 sealed class Config {
 
@@ -16,7 +15,7 @@ sealed class Config {
 
     class Function(
         val name: String,
-        val arguments: List<Argument>,
+        val arguments: Arguments,
         val block: ActionBlock
     ) : Config()
 }
@@ -27,23 +26,23 @@ open class Action : Config() {
 
     class Comment(val comment: String) : Action()
 
-    sealed class Assignable(val argument: Argument) : Action() {
-        class Expression(argument: Argument, xpression: Xpression) : Assignable(argument)
-        class Object(argument: Argument, crudable: Crudable) : Assignable(argument)
-        class Action(argument: Argument, actionable: Actionable) : Assignable(argument)
+    sealed class Assignable(val variable: Argument) : Action() {
+        class Expression(variable: Argument, xpression: Xpression) : Assignable(variable)
+        class Function(variable: Argument, actionable: Actionable) : Assignable(variable)
+        class Object(variable: Argument, crudable: Crudable) : Assignable(variable)
     }
 
     sealed class Actionable : Action() {
+        class Function(name: String, parameters: Parameters) : Actionable()
+        class InlineFunction(name: String, parameters: Parameters, block: ActionBlock): Actionable()
         class External(path: String) : Actionable()
-        class Execute(parameters: Component.Parameters, name: String) : Actionable()
-        class ExecuteInline(parameters: Component.Parameters, block: ActionBlock) : Actionable()
     }
 
     sealed class Crudable : Action() {
-        class Create(metadata: Component.Metadata) : Crudable()
-        class Edit(xpression: Xpression, metadata: Component.Metadata?) : Crudable()
-        class Delete(xpression: Xpression, metadata: Component.Metadata?) : Crudable()
-        class View(xpression: Xpression?, metadata: Component.Metadata?) : Crudable()
+        class Create(metadata: Metadata) : Crudable()
+        class Edit(xpression: Xpression, metadata: Metadata?) : Crudable()
+        class Delete(xpression: Xpression, metadata: Metadata?) : Crudable()
+        class View(xpression: Xpression?, metadata: Metadata?) : Crudable()
     }
 
     class Conditional(
@@ -52,13 +51,16 @@ open class Action : Config() {
     ) : Action()
 
     class Iterable(
-        val parameters: List<Component.Parameter>,
+        val parameters: Parameters,
         val expression: Xpression,
-        val block: ActionBlock,
-        val regex: String? = null
+        val block: ActionBlock
     ) : Action()
 
-    class Return(val xpression: Xpression) : Action()
+    sealed class Controllable() : Action() {
+        class Return(val xpression: Xpression) : Controllable()
+        object Break : Controllable()
+        object Continue : Controllable()
+    }
 }
 
 sealed class Component : Config() {
@@ -80,6 +82,7 @@ sealed class Component : Config() {
         class Expression(name: String, expression: Xpression) : Parameter(name)
     }
 
+    class Arguments(val arguments: List<Argument>) : Component()
     class Argument(val name: String, val type: String?) : Component()
     class Comment(val comment: String) : Component()
     class Error(val message: String) : Component()

@@ -1,8 +1,6 @@
 package com.xpress
 
-import com.xpress.config.Action
-import com.xpress.config.Config
-import com.xpress.config.XpressConfig
+import com.xpress.config.*
 import java.util.Stack
 
 class Xpressor constructor(
@@ -43,7 +41,7 @@ class Xpressor constructor(
         lateinit var xpressPresenter: XpressPresenter
 
         fun push(config: Config.Function) {
-            config.arguments.map {
+            config.arguments.arguments.map {
                 context.setVariables(it.name, it.type.orEmpty())
             }
             config.block.actions.map {

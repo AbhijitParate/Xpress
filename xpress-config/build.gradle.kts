@@ -6,8 +6,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 sourceSets {
@@ -28,31 +28,36 @@ sourceSets {
 
 tasks.generateGrammarSource {
     maxHeapSize = "64m"
-    arguments = arguments + listOf("-package", "com.xpress.config.internal", "-visitor")
+    arguments = arguments + listOf(
+        "-o", "${project.projectDir}/build/generated",
+        "/src/antlr/*.g4",
+        "-package", "com.xpress.config.internal",
+        "-visitor",
+    )
     outputDirectory = File("${project.projectDir}/build/generated/com/xpress/xpressor/internal")
 }
 
 tasks.compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "21"
     dependsOn(tasks.generateGrammarSource)
 }
 
 tasks.compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "21"
     dependsOn(tasks.generateTestGrammarSource)
 }
 
 dependencies {
     antlr("org.antlr:antlr4:4.13.1")
     implementation("org.antlr:antlr4-runtime:4.13.1")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
-    implementation("org.apache.commons:commons-text:1.10.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
+    implementation("org.apache.commons:commons-text:1.11.0")
     implementation("com.google.code.gson:gson:2.10.1")
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.10")
-    testImplementation("org.junit.platform:junit-platform-suite-engine:1.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.21")
+    testImplementation("org.junit.platform:junit-platform-suite-engine:1.10.1")
 }
 
 tasks.test {

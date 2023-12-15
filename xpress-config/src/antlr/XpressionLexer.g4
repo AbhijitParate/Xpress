@@ -47,27 +47,20 @@ WS  :   (' ' | '\t' | '\r'| '\n' | '\u000C' ) -> skip ;
 /* Reserved Keywords */
 IMPORT      : 'import'   ;
 FROM        : 'from'     ;
-FUNCTION    : 'function' ;
+FUNCTION    : 'fun'      ;
 DEF         : 'def'      ;
-ACTION      : 'action'   ;
 
 IF          : 'if'       ;
-IN          : 'in'       ;
-WITH        : 'with'     ;
 ELSE        : 'else'     ;
 SWITCH      : 'switch'   ;
 CASE        : 'case'     ;
-ITERATE     : 'iterate'  ;
-ITEMS       : 'items'    ;
+FOR         : 'for'      ;
+IN          : 'in'       ;
 RETURN      : 'return'   ;
+BREAK       : 'break'    ;
+CONTINUE    : 'continue' ;
 
-
-CREATE      : 'create'   ;
-EDIT        : 'edit'     ;
-DELETE      : 'delete'   ;
-VIEW        : 'view'     ;
-
-ASSIGN      : '='       ;
+ASSIGN      : '='        ;
 APPEND      : '+='       ;
 COMMA       : ','        ;
 COLON       : ':'        ;
