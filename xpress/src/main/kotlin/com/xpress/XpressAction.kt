@@ -66,7 +66,7 @@ abstract class XpressAction(val config: Action, val context: XpressContext) {
     sealed class Data(val any: Any?)
 
     // No data
-    class None internal constructor() : Data(null)
+    open class None internal constructor() : Data(null)
 
     // set data
     class Success internal constructor(any: Any?) : Data(any)
@@ -79,6 +79,12 @@ abstract class XpressAction(val config: Action, val context: XpressContext) {
 
     // return with data
     class Return internal constructor(any: Any?) : Data(any)
+
+    // break
+    data object Break : Data(null)
+
+    // continue
+    data object Continue : Data(null)
 
     object State {
         val Created = 0

@@ -1,9 +1,10 @@
 package com.xpress
 
+import com.xpress.XpressAction.*
 import com.xpress.config.*
 import java.util.Stack
 
-class Xpressor constructor(
+class Xpressor(
     private val config: XpressConfig,
     private val context: XpressContext = XpressContext.root()
 ) {
@@ -36,7 +37,7 @@ class Xpressor constructor(
 
         private val actionsStack: Stack<Action> = Stack()
 
-        private lateinit var actionData: XpressAction.Data
+        private lateinit var actionData: Data
 
         lateinit var xpressPresenter: XpressPresenter
 
@@ -51,23 +52,32 @@ class Xpressor constructor(
 
         fun run(context: XpressContext) {
             while (true) {
-                val action = XpressAction.create(actionsStack.pop(), context) ?: run {
+                val action = actionsStack.pop()?.let { XpressAction.create(it, context) } ?: run {
                     xpressPresenter.complete(actionData)
                     return
                 }
                 when (val data = action.run(xpressPresenter, ::complete)) {
                     // finish with error
-                    is XpressAction.Error -> {
+                    is Error -> {
                         xpressPresenter.complete(data)
                         return
                     }
                     // finish with return data
-                    is XpressAction.Return -> {
+                    is Return -> {
+                        xpressPresenter.complete(data)
+                        return
+                    }
+                    // break
+                    is Break -> {
                         xpressPresenter.complete(data)
                         return
                     }
                     // continue
-                    is XpressAction.Success -> {
+                    is Continue -> {
+                        xpressPresenter.complete(data)
+                        return
+                    }
+                    is Success -> {
                         continue
                     }
                     // async / presenting ui
@@ -78,24 +88,24 @@ class Xpressor constructor(
             }
         }
 
-        fun complete(data: XpressAction.Data) {
+        fun complete(data: Data) {
             when (data) {
                 // finish with error
-                is XpressAction.Error -> {
+                is Error -> {
                     xpressPresenter.complete(data)
                 }
                 // finish with return data
-                is XpressAction.Return -> {
+                is Return -> {
                     xpressPresenter.complete(data)
                 }
                 // continue
-                is XpressAction.Success -> {
+                is Success -> {
                     run(context)
                 }
                 // async / presenting ui
                 else -> {
                     if (context.isRoot) return
-                    // data can't be Unknown
+                    // data can't be Unknownsa
                     val failure = XpressAction.returnError("Error: Unknown data")
                     xpressPresenter.complete(failure)
                 }
