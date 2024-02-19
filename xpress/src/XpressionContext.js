@@ -1,0 +1,4 @@
+
+class XpressionContext {
+    resolve(accessor);
+}
